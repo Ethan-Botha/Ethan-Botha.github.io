@@ -670,7 +670,9 @@
         };
 
         vegtable.prototype.types = function(){
-
+          
+        if(this.y < monthStart+hig*beds){
+          
           //broad bean
           if(this.planted === "broad bean"){
 
@@ -936,7 +938,7 @@
             this.name = "";
             this.fam = color(255, 255, 255,0);
           }
-
+         }
         };
 
 
