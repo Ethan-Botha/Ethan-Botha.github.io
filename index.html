@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<!--
+
+-->
+<html>
+  <head>
+    <title>Vegetable garden planner</title>
+    <style>
+      body {
+
+        background-color:rgb(0, 40, 40);
+        font-family:"Lato";
+        text-align:center;
+      }
+
+      body ::-webkit-scrollbar-thumb:hover {
+        background: rgba(150, 150, 150);
+        border-radius: 10px;
+      }
+      body ::-webkit-scrollbar-thumb:active {
+        background: rgba(200, 200, 200);
+        border-radius: 10px;
+      }
+      body ::-webkit-scrollbar-thumb {
+        background: rgb(100,100,100);
+        border-radius: 10px;
+      }
+      body ::-webkit-scrollbar {
+        width: 10px;
+        box-shadow: -1px 3px 5px black;
+        border-radius: 10px;
+      }
+
+      .titles {
+        position:relative;
+
+        color:rgb(255, 255, 80);
+        top:-15px;
+        text-shadow: -2px 5px 2px black;
+        text-align:center;
+      }
+
+      .headers {
+        position: relative;
+        top:10px;
+        color:rgb(0, 20, 20);
+        background-color:rgb(255, 255, 90);
+        box-shadow: 0px 5px 10px black;
+      }
+
+      .feet {
+        position: fixed;
+        padding:5px;
+        z-index:3;
+        width:98%;
+        left:center;
+        top: 595px;
+        background-color:rgb(150, 150, 150);
+        border-radius:5px;
+        color:rgb(0, 0, 0);
+        box-shadow: -1px 5px 5px black;
+      }
+
+
+      p.texts{
+        padding:10px 5px 20px 5px;
+        border-bottom:1px solid ;
+      }
+
+      .texts{
+        font-family:"Corbel";
+        color: white;
+        text-align:left;
+      }
+
+      a {
+        color:rgb(180, 40, 180);
+        text-align:left;
+      }
+
+      div{
+        position:absolute;
+        top:60px;
+        left:74%;
+        width:26%;
+        height:550px;
+        overflow-y:auto;
+        overflow-x:hidden;
+        background-color:rgb(0,39,39);
+      }
+
+      canvas{
+        position:absolute;
+        top:60px;
+        left:0;
+        margin-left:5px;
+        background-color:rgb(30,40,40);
+        box-shadow:5px 5px 20px black;
+      }
+
+    </style>
+  </head>	
+
+  <body>
+
+    <h1 class = "titles">Organic Vegetable Garden Planner</h1>
+    <div>
+
+      <h2 class = "titles">Contents</h2>
+
+      <ul class="texts">
+
+        <li><a href="#about-planner">About.</a></li>
+        <li><a href="#how">How.</a></li>
+
+      </ul>
+
+      <h2 id="about-planner" class="headers">About.</h2>
+
+
+      <p class="texts">
+        This planner's concept was originally designed by Jaco Drost to aid vegetable gardening, because <strong>the hardest,  most important part of gardening is planning.</strong> If you don't plan you will most likely plant too many of the same vegetable, or too little, maybe you might plant all of your beds full at the same time and wait, and wait, until finally your veggies are ready to be harvested, just to find out you have too much vegetables. So you share or sell your veg for about two to three months, until all of your veggies die out. <strong>Then you have to do it all over again</strong>, while slowly your soil quality declines and your next harvest gets diseases and pests. Most people give up at this stage especially if you try organic gardening.
+      </p>
+
+      <p class="texts">
+        So you might be wondering how does planning resolve these problems? Well, the planner's purpose is to spread out sowing and planting trough out the year, in other words, planting a few things every month to have a <strong>continual harvest whole year round.</strong>
+
+      </p>
+
+      <h2 id="how"  class="headers">How.</h2>
+
+      <p class="texts">
+        The basic idea is to fill all of the months and beds with a large variety of vegetables <strong>with out adding the same family in the same bed twice</strong>, the families are displayed by their color, example : peas and beans should not both be in the same bed. Nor should you plant the same vegetable twice in the same bed.
+      </p>
+      
+      <p class="texts">
+        To add a vegetable to the table simply click on the vegetable you want, then click it in the month you want to plant it, now the table shows how long the vegetable will be in the bed. The blue outline shows when you will likely harvest from this vegetable, now right next to the end of the vegetables growing period(when the veg will be taken out of the bed) plant your next vegetable, and continue until your bed is completely filled. <strong>To delete right click the <em>begining</em> of the vegetable you want to remove. Unfortunaly there is no saving function</strong> therefore take a screenshot/print if you are happy with your plan!
+      </p>
+      
+    </div>
+
+    <canvas id="planner-canvas"></canvas>
+
+    <h6 class = "feet">Note : Vegetable growing info may vary from area or veg variaty. For more info contact : 062 165 3404</h6>
+  </body>
+
+  <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+  <script>
+    var programCode = function(processingInstance) {
+      with (processingInstance) {
+        size(995, 550); 
+        frameRate(25);
+
+        /****************************************************************
+    This is a program to help plan vegtable gardening. 
+    Note : The vegtables' seasons are set for South Africa
+
+    Click on a veg and place it on the month and bed you want to
+    plant it in.    
+
+****************************************************************/
+        var colors = [
+          /**colors**/        /**families**/
+          color(255, 0, 0,200),//nightshade 
+          color(17, 0, 255,200),//sunflower
+          color(0, 0, 255,200),//grass
+          color(0, 255, 0,200),//legume
+          color(255, 0, 136,200),//goosefoot
+          color(247, 255, 0,200),//mustard
+          color(255, 140, 0,200),//carrot
+          color(170, 0, 255,200),//arium
+          color(76, 158, 0,200),//gourd
+          color(50, 50, 50),//planner
+          color(255, 255, 255),//text
+          color(0, 0, 0),//grid
+        ];
+
+        var names = [
+
+          "Broad bean",colors[3],
+
+          "Dwarf bean",colors[3],
+
+          "Beetroot",colors[4],
+
+          "Brinjal",colors[0],
+
+          "Broccoli",colors[5],
+
+          "Cauliflower",colors[5],
+
+          "Cabbage",colors[5],
+
+          "Carrot",colors[6],
+
+          "Garlic",colors[7],
+
+          "Turnip",colors[5],
+
+          "Cucumber",colors[8],
+
+          "Kale",colors[5],
+
+          "Lettuce",colors[1],
+
+          "Leek",colors[7],
+
+          "Onion",colors[7],
+
+          "Peas",colors[3],
+
+          "Pepper",colors[0],
+
+          "Chilli",colors[0],
+
+          "Pumpkin",colors[8],
+
+          "Radish",colors[5],
+
+          "Spinach",colors[4],
+
+          "Squash",colors[8],
+
+          "Tomato",colors[0],
+
+          "Celery",colors[6],
+
+        ];
+
+        var bedStart = width/25;
+        var buttonStart = 25;
+        var plannerWid = width-bedStart;    
+        var wid = plannerWid/12;    
+        var hig = height/40;
+        var beds = 15;
+        var monthStart = height/2.3;
+
+        var page = "home";
+
+        {
+          var jan = bedStart;
+          var feb = bedStart+wid;
+          var mar = bedStart+wid*2;
+          var apr = bedStart+wid*3;
+          var may = bedStart+wid*4;
+          var jun = bedStart+wid*5;
+          var jul = bedStart+wid*6;
+          var aug = bedStart+wid*7;
+          var sept = bedStart+wid*8;
+          var oct = bedStart+wid*9;
+          var nov = bedStart+wid*10;
+          var dec = bedStart+wid*11;}//month x values
+
+        var mouse = {
+          clicked: false,
+        };
+
+        //warning for planting in the wrong season
+        var oops = function(info){
+
+          if(mouseX < width/2){
+
+            textFont(createFont("Trebuchet MS Bold"),16);
+
+            fill(0, 0, 0,200);
+            rect(mouseX,mouseY,200,65,5);
+
+            textAlign(CENTER,CENTER);
+
+            fill(0, 255, 0);
+            text(info,mouseX+100,mouseY+50);
+
+            textAlign(0,0);
+            fill(255, 0, 0);
+            text("  You can't plant this\nvegtabe in this season!",mouseX+20,mouseY+20);
+
+          }else{
+
+            textFont(createFont("Trebuchet MS Bold"),16);
+
+            fill(0, 0, 0,200);
+            rect(mouseX-200,mouseY,200,65,5);
+
+            textAlign(CENTER,CENTER);
+
+            fill(0, 255, 0);
+            text(info,mouseX-100,mouseY+50);
+
+            textAlign(0,0);
+            fill(255, 0, 0);
+            text("  You can't plant this\nvegtabe in this season!",mouseX-180,mouseY+20);
+
+
+          }    
+        };
+
+        var gridBlock = function(x, y, len, hig){
+
+          this.x = x;
+          this.y = y;
+        };
+
+        //grid block design and mechanics
+        gridBlock.prototype.draw = function(){
+
+          textFont(createFont("fantasy"),12);
+
+          stroke(colors[11]);
+          strokeWeight(1);
+          //gridlines
+          //verticle lines
+          line(this.x,this.y,this.x,monthStart+beds*hig);
+
+          //horizontal lines
+          line(this.x,this.y,width,this.y);
+
+          //last lines
+          line(0,monthStart+beds*hig,width,monthStart+beds*hig);
+          //line(width-1,monthStart,width-1,monthStart+beds*hig);
+
+
+          //if the mouse is over a block and is clicked it turns black
+          if(mouseX > this.x && mouseX < this.x + wid && mouseY >          this.y && mouseY < this.y +hig && mouseY > monthStart){
+
+            fill(0, 0, 0,120);
+            strokeWeight(3);
+            stroke(255, 0, 0);
+            rect(this.x,this.y,wid,hig);
+
+          }
+          strokeWeight(5);
+        };
+
+        var block = [];//grid block loop
+        for (var x = bedStart; x < width; x += wid){
+
+          for(var y = monthStart; y < monthStart+hig*beds ; y += hig){
+
+            block.push(new gridBlock(x,y,wid));
+          }
+        }
+
+
+        var vegtable = function(x,y,leng,fam,planted,seasonBegin,seasonEnd,name,harv){
+
+          this.x = x;
+          this.y = y;
+          this.leng = leng;
+          this.fam = fam;
+          this.planted = planted || false;
+          this.name = name;
+          this.harv = harv;
+
+          this.selected = "";
+          this.planted = "";
+
+          this.block_cld = false;
+        };
+
+        vegtable.prototype.draw = function(){
+          textAlign(CENTER,CENTER);
+          textFont(createFont("fantasy"),width/70);
+
+          /**DRAWS VEGTABLES IN GRID**/    
+          noStroke();
+          fill(this.fam);
+          rect(this.x,this.y,this.leng*wid,hig+1);
+
+          /**DRAWS VEGTABLE'S NAME**/        
+          for(var i = this.x; i <= this.leng*wid-1+this.x; i += wid){
+
+            fill(0, 0, 0);
+            text(this.name,i+wid/2,this.y+hig/2);
+          }
+
+          /**DRAWS HARVEST MONTHS**/    
+          noFill();
+          strokeWeight(3);
+          stroke(0, 255, 255);
+          if(this.leng > 0){
+
+            rect(this.x + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+          }
+          noStroke();
+
+
+
+          /**if veg goes of the screen the rest loops around**/
+          //december veg rotation    
+          if(this.x >= dec){
+
+            fill(this.fam);
+            rect(-jan,this.y,this.leng*wid,hig+1);
+
+            for(var i = -jan; i <= this.leng*wid-1 + -jan; i += wid){
+
+              fill(0, 0, 0);
+              text(this.name,i+wid/2,this.y+hig/2);
+            }
+            noFill();
+            strokeWeight(2);
+            stroke(0, 255, 255);
+            if(this.leng > 0){
+              rect(-jan + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+            }
+          }else    
+
+            //november veg rotation    
+            if(this.x >= nov && this.x <= dec){
+
+              fill(this.fam);
+              rect(-feb,this.y,this.leng*wid,hig+1);
+
+              for(var i = -feb; i <= this.leng*wid-1 + -feb; i += wid){
+
+                fill(0, 0, 0);
+                text(this.name,i+wid/2,this.y+hig/2);
+              }
+              noFill();
+              strokeWeight(2);
+              stroke(0, 255, 255);
+              if(this.leng > 0){
+                rect(-feb + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+              }
+            }else    
+
+              //october veg rotation    
+              if(this.x >= oct && this.x <= nov){
+
+                fill(this.fam);
+                rect(-mar,this.y,this.leng*wid,hig+1);
+
+                for(var i = -mar; i <= this.leng*wid-1 + -mar; i += wid){
+
+                  fill(0, 0, 0);
+                  text(this.name,i+wid/2,this.y+hig/2);
+                }
+                noFill();
+                strokeWeight(2);
+                stroke(0, 255, 255);
+                if(this.leng > 0){
+                  rect(-mar + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                }
+              }else    
+
+                //september veg rotation    
+                if(this.x >= sept && this.x <= oct){
+
+                  fill(this.fam);
+                  rect(-apr,this.y,this.leng*wid,hig+1);
+
+                  for(var i = -apr; i <= this.leng*wid-1 + -apr; i += wid){
+
+                    fill(0, 0, 0);
+                    text(this.name,i+wid/2,this.y+hig/2);
+                  }
+                  noFill();
+                  strokeWeight(2);
+                  stroke(0, 255, 255);
+                  if(this.leng > 0){
+                    rect(-apr + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                  }
+                }else    
+
+                  //august veg rotation    
+                  if(this.x >= aug && this.x <= sept){
+
+                    fill(this.fam);
+                    rect(-may,this.y,this.leng*wid,hig+1);
+
+                    for(var i = -may; i <= this.leng*wid-1 + -may; i += wid){
+
+                      fill(0, 0, 0);
+                      text(this.name,i+wid/2,this.y+hig/2);
+                    }
+                    noFill();
+                    strokeWeight(2);
+                    stroke(0, 255, 255);
+                    if(this.leng > 0){
+                      rect(-may + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                    }
+                  }else    
+
+                    //july veg rotation    
+                    if(this.x >= jul && this.x <= aug){
+
+                      fill(this.fam);
+                      rect(-jun,this.y,this.leng*wid,hig+1);
+
+                      for(var i = -jun; i <= this.leng*wid-1 + -jun; i += wid){
+
+                        fill(0, 0, 0);
+                        text(this.name,i+wid/2,this.y+hig/2);
+                      }
+                      noFill();
+                      strokeWeight(2);
+                      stroke(0, 255, 255);
+                      if(this.leng > 0){
+                        rect(-jun + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                      }
+                    }else    
+
+                      //june veg rotation    
+                      if(this.x >= jun && this.x <= jul){
+
+                        fill(this.fam);
+                        rect(-jul,this.y,this.leng*wid,hig+1);
+
+                        for(var i = -jul; i <= this.leng*wid-1 + -jul; i += wid){
+
+                          fill(0, 0, 0);
+                          text(this.name,i+wid/2,this.y+hig/2);
+                        }
+                        noFill();
+                        strokeWeight(2);
+                        stroke(0, 255, 255);
+                        if(this.leng > 0){
+                          rect(-jul + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                        }
+                      }else    
+
+                        //may veg rotation    
+                        if(this.x >= may && this.x <= jun){
+
+                          fill(this.fam);
+                          rect(-aug,this.y,this.leng*wid,hig+1);
+
+                          for(var i = -aug; i <= this.leng*wid-1 + -aug; i += wid){
+
+                            fill(0, 0, 0);
+                            text(this.name,i+wid/2,this.y+hig/2);
+                          }
+                          noFill();
+                          strokeWeight(2);
+                          stroke(0, 255, 255);
+                          if(this.leng > 0){
+                            rect(-aug + this.leng*wid-this.harv*wid,this.y,this.harv*wid,hig);
+
+                          }
+                        }    
+          /********************************************************/      
+
+          //if mouse clicked a block
+          if(mouseX > this.x && mouseX < this.x + wid && mouseY > this.y && mouseY < this.y + hig && mouseY > monthStart && mouse.clicked === true){
+
+            this.block_cld = true;
+            mouse.clicked = false;
+          }else{
+
+            this.block_cld = false;
+          }    
+
+
+          /*****if a veg selected and clicked on a block draw activates****/
+
+          //if mouse right clicked a block it deletes.
+          if(this.block_cld === true && mouseButton === RIGHT){
+
+            this.planted = "";
+
+            //if lettuce is selected and clicked draw lettuce
+          }else if(this.block_cld === true && mouseButton === LEFT && this.selected === "broad bean"){
+
+
+            this.planted = "broad bean";
+
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "dwarf bean"){
+
+
+            this.planted = "dwarf bean";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "beetroot"){
+
+
+            this.planted = "beetroot";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "brinjal"){
+
+
+            this.planted = "brinjal";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "broccoli"){
+
+
+            this.planted = "broccoli";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "cauliflower"){
+
+
+            this.planted = "cauliflower";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "cabbage"){
+
+
+            this.planted = "cabbage";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "carrot"){
+
+
+            this.planted = "carrot";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "garlic"){
+
+
+            this.planted = "garlic";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "turnip"){
+
+
+            this.planted = "turnip";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "cucumber"){
+
+
+            this.planted = "cucumber";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "kale"){
+
+
+            this.planted = "kale";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "lettuce"){
+
+
+            this.planted = "lettuce";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "leek"){
+
+
+            this.planted = "leek";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "onion"){
+
+
+            this.planted = "onion";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "peas"){
+
+
+            this.planted = "peas";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "pepper"){
+
+
+            this.planted = "pepper";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "chillies"){
+
+
+            this.planted = "chillies";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "pumpkin"){
+
+
+            this.planted = "pumpkin";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "radish"){
+
+
+            this.planted = "radish";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "spinach"){
+
+
+            this.planted = "spinach";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "squash"){
+
+
+            this.planted = "squash";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "tomato"){
+
+
+            this.planted = "tomato";
+          }else if(this.block_cld === true  && mouseButton === LEFT && this.selected === "celery"){
+
+
+            this.planted = "celery";
+          }
+
+        };
+
+        vegtable.prototype.types = function(){
+
+          //broad bean
+          if(this.planted === "broad bean"){
+
+            this.leng = 4;
+            this.name = "Broad Beans";
+            this.fam = colors[3];
+            this.harv = 2;
+
+            /**season begin*****season end**/        
+            if(this.x < mar || this.x > jul){
+              oops("March - July");
+            }  
+
+            //println(this.x);
+          }else if(this.planted === "dwarf bean"){
+
+            this.leng = 4;
+            this.name = "Dwarf Beans";
+            this.fam = colors[3];
+            this.harv = 2;
+
+            /**season begin*****season end**/
+            if(this.x < aug && this.x > mar){
+              oops("August - March");
+            }  
+
+          }else if(this.planted === "beetroot"){
+
+            this.leng = 3;
+            this.name = "Beetroot";
+            this.fam = colors[4];
+            this.harv = 1;
+
+          }else if(this.planted === "brinjal"){
+
+            this.leng = 4;
+            this.name = "Brinjals";
+            this.fam = colors[0];
+            this.harv = 3;
+
+            /**season begin*****season end**/
+            if(this.x < sept || this.x > nov){
+              oops("September - November");
+            }        
+          }else if(this.planted === "broccoli"){
+
+            this.leng = 3;
+            this.name = "Broccoli";
+            this.fam = colors[5];
+            this.harv = 1;
+
+            /**season begin*****season end**/
+            if(this.x < dec && this.x > feb){
+              oops("December - Febuary");
+            }
+
+          }else if(this.planted === "cauliflower"){
+
+            this.leng = 5;
+            this.name = "Cauliflower";
+            this.fam = colors[5];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < nov && this.x > feb){
+              oops("November - Febuary");
+            }
+
+          }else if(this.planted === "cabbage"){
+
+            this.leng = 3;
+            this.name = "Cabbage";
+            this.fam = colors[5];
+            this.harv = 1;
+
+          }else if(this.planted === "carrot"){
+
+            this.leng = 4;
+            this.name = "Carrots";
+            this.fam = colors[6];
+            this.harv = 1.5;
+
+          }else if(this.planted === "garlic"){
+
+            this.leng = 9;
+            this.name = "Garlic ";
+            this.fam = colors[7];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < feb || this.x > apr){
+              oops("Febuary - April");
+            }
+
+          }else if(this.planted === "turnip"){
+
+            this.leng = 3;
+            this.name = "Turnips";
+            this.fam = colors[5];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < jul || this.x > oct){
+              oops("July - October");
+            }
+
+          }else if(this.planted === "cucumber"){
+
+            this.leng = 3;
+            this.name = "Cucumber";
+            this.fam = colors[8];
+            this.harv = 1.5;
+
+            /*******season begin*****season end**/
+            if(this.x < sept && this.x > jan){
+              oops("September - January");
+            }
+
+          }else if(this.planted === "kale"){
+
+            this.leng = 3;
+            this.name = "Kale";
+            this.fam = colors[5];
+            this.harv = 1.5;
+
+            /*******season begin*****season end**/
+            if(this.x < jan || this.x > mar){
+              oops("January - March");
+            }
+
+          }else if(this.planted === "lettuce"){
+
+            this.leng = 3;
+            this.name = "Lettuce";
+            this.fam = colors[1];
+            this.harv = 1;
+
+          }else if(this.planted === "leek"){
+
+            this.leng = 6;
+            this.name = "Leeks";
+            this.fam = colors[7];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < jun && this.x > mar){
+              oops("June - March");
+            }
+
+          }else if(this.planted === "onion"){
+
+            this.leng = 7;
+            this.name = "Onions";
+            this.fam = colors[7];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < aug && this.x > apr){
+              oops("August - April");
+            }
+
+          }else if(this.planted === "peas"){
+
+            this.leng = 5;
+            this.name = "Peas";
+            this.fam = colors[3];
+            this.harv = 2;
+
+            /*******season begin*****season end**/
+            if(this.x < feb || this.x > sept){
+              oops("Febuary - September");
+            }
+
+          }else if(this.planted === "pepper"){
+
+            this.leng = 5;
+            this.name = "Peppers";
+            this.fam = colors[0];
+            this.harv = 3;
+
+            /*******season begin*****season end**/
+            if(this.x < jul || this.x > nov){
+              oops("July - November");
+            }
+
+          }else if(this.planted === "chillies"){
+
+            this.leng = 5;
+            this.name = "Chillies";
+            this.fam = colors[0];
+            this.harv = 3;
+
+            /*******season begin*****season end**/
+            if(this.x < jul || this.x > nov){
+              oops("July - November");
+            }
+
+          }else if(this.planted === "pumpkin"){
+
+            this.leng = 3;
+            this.name = "Pumpkins";
+            this.fam = colors[8];
+            this.harv = 1.5;
+
+            /*******season begin*****season end**/
+            if(this.x < sept || this.x > dec){
+              oops("September - December");
+            }
+
+          }else if(this.planted === "radish"){
+
+            this.leng = 2;
+            this.name = "Radish";
+            this.fam = colors[5];
+            this.harv = 1;
+
+          }else if(this.planted === "spinach"){
+
+            this.leng = 2;
+            this.name = "Spinach";
+            this.fam = colors[4];
+            this.harv = 1.5;
+
+          }else if(this.planted === "squash"){
+
+            this.leng = 3;
+            this.name = "Squash";
+            this.fam = colors[8];
+            this.harv = 1.5;
+
+            /*******season begin*****season end**/
+            if(this.x < sept || this.x > dec){
+              oops("September - December");
+            }
+
+          }else if(this.planted === "tomato"){
+
+            this.leng = 5;
+            this.name = "Tomatoes";
+            this.fam = colors[0];
+            this.harv = 3;
+
+            /*******season begin*****season end**/
+            if(this.x < sept || this.x > dec){
+              oops("September - December");
+            }
+
+          }else if(this.planted === "celery"){
+
+            this.leng = 5;
+            this.name = "Celery";
+            this.fam = colors[6];
+            this.harv = 1;
+
+            /*******season begin*****season end**/
+            if(this.x < aug || this.x > mar){
+              oops("August - March");
+            }
+
+          }else{
+
+            this.leng = 0;
+            this.name = "";
+            this.fam = color(255, 255, 255,0);
+          }
+
+        };
+
+
+        var veg = [];//grid block loop
+        for (var x = bedStart; x < width; x += wid){
+
+          for(var y = monthStart; y < monthStart+hig*beds ; y += hig){
+
+            veg.push(new vegtable(x,y));
+          }
+        }
+
+
+        //list of months above the grid
+        var months = function(){
+
+          //grey background for the months
+          fill(colors[9]);
+          rect(bedStart,monthStart-hig+1,width-bedStart,hig);
+
+          fill(colors[10]);
+          textFont(createFont("aharoni Bold"),width/70);
+          textAlign(CENTER,CENTER);
+
+          text("January",jan+wid/2,monthStart-hig/2);
+
+          text("Febuary",feb+wid/2,monthStart-hig/2);
+
+          text("March",mar+wid/2,monthStart-hig/2);
+
+          text("April",apr+wid/2,monthStart-hig/2);
+
+          text("May",may+wid/2,monthStart-hig/2);
+
+          text("June",jun+wid/2,monthStart-hig/2);
+
+          text("July",jul+wid/2,monthStart-hig/2);
+
+          text("August",aug+wid/2,monthStart-hig/2);
+
+          text("September",sept+wid/2,monthStart-hig/2);
+
+          text("October",oct+wid/2,monthStart-hig/2);
+
+          text("November",nov+wid/2,monthStart-hig/2);
+
+          text("December",dec+wid/2,monthStart-hig/2);
+        };
+
+        //list of bed numbers next to the grid
+        var bednum = function() {
+
+          textAlign(CENTER,CENTER);
+          fill(colors[9]);
+          noStroke();
+          rect(0,monthStart,bedStart,beds*hig+1);
+
+          fill(colors[10]);
+          textFont(createFont("Trebuchet MS Bold"),width/100);
+
+          for(var n = monthStart+hig/2; n < beds*hig+monthStart; n += hig){
+
+            text("Bed "+round(n/hig-17),bedStart/2,n);
+          }
+        };
+
+        var buttons = function(){
+
+          noStroke();
+
+          for(var x = 1; x < width; x += width/12){
+
+            for(var y = buttonStart; y < buttonStart+30; y += hig*1.7){
+
+              fill(colors[9]);
+              rect(x,y,wid,hig*1.5);
+            }  
+          }
+
+          textFont(createFont("fantasy"),width/64);
+          var n = 0;
+          while(n < names.length){
+
+            //shadow
+            fill(41, 41, 41);
+            text(names[n*2],wid/2.0+n*wid*1.04-1, buttonStart+hig-3);
+            //text
+            fill(names[n*2+1]);
+            text(names[n*2],wid/2.0+n*wid*1.04, buttonStart+hig-4);
+
+            //shadow
+            fill(41, 41, 41);
+            text(names[n*2+24],wid/2.0+n*wid*1.04-1, buttonStart+hig+hig*1.5+1);
+
+            //text
+            fill(names[n*2+25]);
+            text(names[n*2+24],wid/2.0+n*wid*1.04, buttonStart+hig+hig*1.5);
+            n ++;
+          }
+
+
+          fill(0, 0, 0,80);
+
+          /******************VEG SELECTION**********************/
+          //broad beans
+          if(mouseX >= 1 && mouseX <= wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(1,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/12 && mouseX <= width/12+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/12,buttonStart,wid,hig*1.5);   
+
+          }else if(mouseX >= width/6 && mouseX <= width/6+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/6,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/4 && mouseX <= width/4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/4,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/3 && mouseX <= width/3+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/3,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2.4 && mouseX <= width/2.4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2.4,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2 && mouseX <= width/2+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/12 && mouseX <= width/2+width/12+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2+width/12,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/6 && mouseX <= width/2+width/6+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2+width/6,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/4 && mouseX <= width/2+width/4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2+width/4,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/3 && mouseX <= width/2+width/3+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2+width/3,buttonStart,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/2.4 && mouseX <= width/2+width/2.4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            rect(width/2+width/2.4,buttonStart,wid,hig*1.5);
+
+            /****************SECOND ROW*********************/ 
+          }else if(mouseX >= 1 && mouseX <= wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(1,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/12 && mouseX <= width/12+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/12,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/6 && mouseX <= width/6+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/6,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/4 && mouseX <= width/4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/4,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/3 && mouseX <= width/3+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/3,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2.4 && mouseX <= width/2.4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2.4,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2 && mouseX <= width/2+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/12 && mouseX <= width/2+width/12+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2+width/12,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/6 && mouseX <= width/2+width/6+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2+width/6,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/4 && mouseX <= width/2+width/4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2+width/4,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/3 && mouseX <= width/2+width/3+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2+width/3,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else if(mouseX >= width/2+width/2.4 && mouseX <= width/2+width/2.4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            rect(width/2+width/2.4,buttonStart+hig*1.7,wid,hig*1.5);
+
+          }else{
+
+            mouse.clicked = false;
+          }
+
+        };   
+
+        var roundbutton = function(x,y,size,message){
+
+          this.x =x;
+          this.y = y;
+          this.size = size;
+          this.message = message;
+        };    
+
+        roundbutton.prototype.draw = function() {
+
+          noStroke();
+          textAlign(CENTER,CENTER);
+          textFont(createFont("Trebuchet MS Bold"),12);
+
+          if(dist(mouseX,mouseY,this.x,this.y) <= this.size / 2){
+
+            fill(40, 80, 80);
+            ellipse(this.x,this.y,this.size,this.size);
+
+          }else{
+
+            fill(0, 40, 40);        
+            ellipse(this.x,this.y,this.size,this.size);
+
+          }
+
+          fill(255, 255, 255);
+          text(this.message,this.x,this.y);
+
+        };
+
+        var buttonH_P= new roundbutton(width/2,height/2,100,"Start a Plan");
+        
+
+        var buttonP_H = new roundbutton(hig,height/3,20,"H");
+
+        var planner = function(){
+
+          background(255,255,255);
+
+          buttonP_H.draw();
+
+          //loops the grid blocks
+          for(var i = 0; i < veg.length; i+=1) {
+
+            textFont(createFont("fantasy"),12);
+
+            veg[i].draw();
+
+            switch (veg.selected) {    
+
+              case "broad bean":
+
+                veg[i].selected = "broad bean";
+                break;
+              case "dwarf bean":
+
+                veg[i].selected = "dwarf bean";
+                break;
+              case "beetroot":
+
+                veg[i].selected = "beetroot";
+                break;
+              case "brinjal":
+
+                veg[i].selected = "brinjal";
+                break;
+              case "broccoli":
+
+                veg[i].selected = "broccoli";
+                break;
+              case "cauliflower":
+
+                veg[i].selected = "cauliflower";
+                break;
+
+              case "cabbage":
+
+                veg[i].selected = "cabbage";
+                break;
+              case "carrot":
+
+                veg[i].selected = "carrot";
+                break;
+              case "garlic":
+
+                veg[i].selected = "garlic";
+                break;
+              case "turnip":
+
+                veg[i].selected = "turnip";
+                break;
+              case "cucumber":
+
+                veg[i].selected = "cucumber";
+                break;
+              case "kale":
+
+                veg[i].selected = "kale";
+                break;
+
+              case "lettuce":
+
+                veg[i].selected = "lettuce";
+                break;
+              case "leek":
+
+                veg[i].selected = "leek";
+                break;
+              case "onion":
+
+                veg[i].selected = "onion";
+                break;
+              case "peas":
+
+                veg[i].selected = "peas";
+                break;
+              case "pepper":
+
+                veg[i].selected = "pepper";
+                break;
+              case "chillies":
+
+                veg[i].selected = "chillies";
+                break;
+
+              case "pumpkin":
+
+                veg[i].selected = "pumpkin";
+                break;
+              case "radish":
+
+                veg[i].selected = "radish";
+                break;
+              case "spinach":
+
+                veg[i].selected = "spinach";
+                break;
+              case "squash":
+
+                veg[i].selected = "squash";
+                break;
+              case "tomato":
+
+                veg[i].selected = "tomato";
+                break;
+              case "celery":
+
+                veg[i].selected = "celery";
+                break;
+                                }    
+
+          }
+
+          buttons();
+          months();//draws months
+          bednum();
+
+          //loops the grid blocks
+          for(var i = 0; i < block.length; i+=1) {
+
+            block[i].draw();
+            veg[i].types();
+          }
+
+
+        };
+
+        var home = function(){
+
+          background(255, 255, 255);
+
+          buttonH_P.draw();
+        };    
+
+
+        draw = function() {
+
+          if(page ==="home"){
+
+            home();
+          }else if(page ==="planner"){
+
+            planner();
+          }    
+        };
+
+        mouseClicked = function(){
+
+          mouse.clicked = true;
+
+
+
+          if(dist(mouseX,mouseY,buttonH_P.x,buttonH_P.y) <= buttonH_P.size / 2 && page === "home"){
+
+            page = "planner";
+
+          }
+          
+          if(dist(mouseX,mouseY,buttonP_H.x,buttonP_H.y) <= buttonP_H.size / 2 && page === "planner"){
+
+            page = "home";
+
+          }
+
+          /******************VEG SELECTION**********************/
+          //broad beans
+          if(mouseX >= 1 && mouseX <= wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "broad bean";
+
+          }else if(mouseX >= width/12 && mouseX <= width/12+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "dwarf bean";
+
+          }else if(mouseX >= width/6 && mouseX <= width/6+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "beetroot";
+
+          }else if(mouseX >= width/4 && mouseX <= width/4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "brinjal";
+
+          }else if(mouseX >= width/3 && mouseX <= width/3+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "broccoli";
+
+          }else if(mouseX >= width/2.4 && mouseX <= width/2.4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "cauliflower";
+
+          }else if(mouseX >= width/2 && mouseX <= width/2+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "cabbage";
+
+          }else if(mouseX >= width/2+width/12 && mouseX <= width/2+width/12+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "carrot";
+
+          }else if(mouseX >= width/2+width/6 && mouseX <= width/2+width/6+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "garlic";
+
+          }else if(mouseX >= width/2+width/4 && mouseX <= width/2+width/4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "turnip";
+
+          }else if(mouseX >= width/2+width/3 && mouseX <= width/2+width/3+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "cucumber";
+
+          }else if(mouseX >= width/2+width/2.4 && mouseX <= width/2+width/2.4+wid && mouseY >= buttonStart && mouseY <= buttonStart+hig*1.5){
+
+            veg.selected = "kale";
+
+            /****************SECOND ROW*********************/ 
+          }else if(mouseX >= 1 && mouseX <= wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "lettuce";
+
+          }else if(mouseX >= width/12 && mouseX <= width/12+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "leek";
+
+          }else if(mouseX >= width/6 && mouseX <= width/6+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "onion";
+
+          }else if(mouseX >= width/4 && mouseX <= width/4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "peas";
+
+          }else if(mouseX >= width/3 && mouseX <= width/3+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "pepper";
+
+          }else if(mouseX >= width/2.4 && mouseX <= width/2.4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "chillies";
+
+          }else if(mouseX >= width/2 && mouseX <= width/2+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "pumpkin";
+
+          }else if(mouseX >= width/2+width/12 && mouseX <= width/2+width/12+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "radish";
+
+          }else if(mouseX >= width/2+width/6 && mouseX <= width/2+width/6+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "spinach";
+
+          }else if(mouseX >= width/2+width/4 && mouseX <= width/2+width/4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "squash";
+
+          }else if(mouseX >= width/2+width/3 && mouseX <= width/2+width/3+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "tomato";
+
+          }else if(mouseX >= width/2+width/2.4 && mouseX <= width/2+width/2.4+wid && mouseY >= buttonStart+hig*1.7 && mouseY <= buttonStart+hig*3.2){
+
+            veg.selected = "celery";
+
+          }   
+          //println(veg.selected);
+        };    
+        //END
+
+      }};
+    var canvas = document.getElementById("planner-canvas"); 
+    var processingInstance = new Processing(canvas, programCode); 
+  </script>
+
+</html>
